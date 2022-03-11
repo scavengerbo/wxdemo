@@ -28,6 +28,7 @@ public class LoginController {
 
         String name = params.get("name");
         String passwd = params.get("passwd");
+        System.out.println(name);
 
         if (StringUtils.isBlank(name) || StringUtils.isBlank(passwd)) {
             return ReturnData.fail("参数校验失败");
