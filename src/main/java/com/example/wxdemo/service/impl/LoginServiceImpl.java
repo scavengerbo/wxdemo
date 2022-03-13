@@ -20,12 +20,13 @@ public class LoginServiceImpl implements ILoginService {
     }
 
     @Override
-    public boolean verifyByNameAndPasswd(String name, String passwd) {
+    public Map verifyByNameAndPasswd(String name, String passwd) {
         Map map = loginMapper.verifyByNameAndPasswd(name, passwd);
-        if (Objects.nonNull(map) && map.size() > 0) {
-            return true;
-        }
-        return false;
+//        if (Objects.nonNull(map) && map.size() > 0) {
+//            return true;
+//        }
+//        return false;
+        return map;
     }
 
 

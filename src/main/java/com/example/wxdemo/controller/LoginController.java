@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Objects;
 
 @RestController()
 @Slf4j
@@ -28,14 +29,18 @@ public class LoginController {
 
         String name = params.get("name");
         String passwd = params.get("passwd");
-        System.out.println(name);
+
 
         if (StringUtils.isBlank(name) || StringUtils.isBlank(passwd)) {
             return ReturnData.fail("参数校验失败");
         }
 
-        boolean map = iLoginService.verifyByNameAndPasswd(name, passwd);
-        return ReturnData.success(map);
+        Map map = iLoginService.verifyByNameAndPasswd(name, passwd);
+        System.out.println(map);
+        if (Objects.nonNull(map) && map.size() > 0) {
+            return ReturnData.success(map);
+        }
+        return ReturnData.fail(map);
     }
 
 

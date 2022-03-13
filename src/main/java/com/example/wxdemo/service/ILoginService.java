@@ -6,5 +6,5 @@ public interface ILoginService {
 
     void register(Map map);
 
-    boolean verifyByNameAndPasswd(String name,String passwd);
+    Map verifyByNameAndPasswd(String name,String passwd);
 }
