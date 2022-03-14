@@ -5,6 +5,7 @@ import com.example.wxdemo.service.ILoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -27,6 +28,12 @@ public class LoginServiceImpl implements ILoginService {
 //        }
 //        return false;
         return map;
+    }
+
+    @Override
+    public List agencyMatters(String userId) {
+        List list = loginMapper.agencyMatters(userId);
+        return list;
     }
 
 

@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -38,6 +39,8 @@ public class LoginController {
         Map map = iLoginService.verifyByNameAndPasswd(name, passwd);
         System.out.println(map);
         if (Objects.nonNull(map) && map.size() > 0) {
+            List agencyMatters = iLoginService.agencyMatters(map.get("userid").toString());
+            map.put("agencyMatters",agencyMatters);
             return ReturnData.success(map);
         }
         return ReturnData.fail(map);
