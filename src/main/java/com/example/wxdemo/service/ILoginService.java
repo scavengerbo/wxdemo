@@ -10,4 +10,10 @@ public interface ILoginService {
     Map verifyByNameAndPasswd(String name,String passwd);
 
     List agencyMatters(String userId);
+
+    List workList(String cid, String uid, String deid);
+
+    List workTitle(String twpid);
+
+    List permUser(String twpid, String userid);
 }

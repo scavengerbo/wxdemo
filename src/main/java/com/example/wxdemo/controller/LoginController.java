@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,5 +47,25 @@ public class LoginController {
         return ReturnData.fail(map);
     }
 
+    @PostMapping("/workList")
+    public ReturnData workList(@RequestParam Map<String,String> params){
+        String cid = params.get("cid");
+        String uid = params.get("userid");
+        String deid = params.get("de_id");
+        List list = iLoginService.workList(cid, uid,deid);
+        return ReturnData.success(list);
+    }
 
+    @PostMapping("/workTitle")
+    public ReturnData workTitle(@RequestParam Map<String,String> params){
+        String twpid = params.get("twp_id");
+        String userid = params.get("userid");
+        System.out.println(twpid);
+        List list = iLoginService.workTitle(twpid);
+        List list1 = iLoginService.permUser(twpid,userid);
+        Map<String,List> map = new HashMap<>();
+        map.put("workTitle",list);
+        map.put("permUser",list1);
+        return ReturnData.success(map);
+    }
 }

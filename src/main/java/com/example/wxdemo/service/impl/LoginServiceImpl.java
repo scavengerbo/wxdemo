@@ -36,5 +36,23 @@ public class LoginServiceImpl implements ILoginService {
         return list;
     }
 
+    @Override
+    public List workList(String cid, String uid, String deid) {
+        List list = loginMapper.workList(cid,uid,deid);
+        return list;
+    }
+
+    @Override
+    public List workTitle(String twpid) {
+        List list = loginMapper.workTitle(twpid);
+        return list;
+    }
+
+    @Override
+    public List permUser(String twpid, String userid) {
+        List list = loginMapper.permUser(twpid, userid);
+        return list;
+    }
+
 
 }
