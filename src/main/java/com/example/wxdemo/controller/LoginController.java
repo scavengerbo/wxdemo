@@ -41,7 +41,7 @@ public class LoginController {
         System.out.println(map);
         if (Objects.nonNull(map) && map.size() > 0) {
             List agencyMatters = iLoginService.agencyMatters(map.get("userid").toString());
-            map.put("agencyMatters",agencyMatters);
+            map.put("agencyMatters", agencyMatters);
             return ReturnData.success(map);
         }
         return ReturnData.fail(map);

@@ -7,7 +7,7 @@ public interface ILoginService {
 
     void register(Map map);
 
-    Map verifyByNameAndPasswd(String name,String passwd);
+    Map verifyByNameAndPasswd(String name, String passwd);
 
     List agencyMatters(String userId);
 
