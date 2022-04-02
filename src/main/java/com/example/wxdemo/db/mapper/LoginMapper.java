@@ -38,7 +38,7 @@ public interface LoginMapper {
                 "              where a.view_perm = b.perms and b.type = 2 and b.perm_mem = #{deid} and b.status = 1))")
         List<Map> workList(@Param("cid") String cid, @Param("uid") String uid, @Param("deid") String deid);
 
-        @Select("select '' as vl,a.uuid as twc_id,b.name as name,b.type,case when b.type=1 or b.type=2 then 0 else 1 end as readonly\n" +
+        @Select("select '' as vl,a.uuid as twc_id,b.name as name,b.type,a.is_null,case when b.type=1 or b.type=2 then 0 else 1 end as readonly\n" +
                 "from template_work_content a,template_title b where a.twp_id=#{twpid} and a.approvalLevel=0\n" +
                 "and a.tid=b.uuid and b.status=1 order by  a.`order`")
         List<Map> workTitle(@Param("twpid") String twpid);

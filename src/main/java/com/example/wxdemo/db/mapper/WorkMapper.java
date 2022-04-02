@@ -17,4 +17,9 @@ public interface WorkMapper {
     @Insert({"insert into work_content(wid, twc_id,twc_value) values" +
             "(#{wid},#{twc_id}, #{vl})"})
     int saveWorkContent(Map workContent);
+
+    @Insert({"INSERT INTO work_approval_proc ( wid, createTime, startTime, approver, result, approcalLevel) " +
+            "VALUES (#{workId}, #{createTime, jdbcType=TIMESTAMP}, #{createTime, jdbcType=TIMESTAMP}, " +
+            "#{permUserID}, '0', #{appLevel})"})
+    int saveWorkApproval(Map map);
 }

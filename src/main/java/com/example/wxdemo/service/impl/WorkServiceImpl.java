@@ -42,6 +42,13 @@ public class WorkServiceImpl implements IWorkService {
             workMapper.saveWorkContent(wc);
         });
 
+        //存审批信息
+        Map<String, Object> workApp = new HashMap<>();
+        workApp.put("workId",workMap.get("workId"));
+        workApp.put("permUserID",map.get("permUserID"));
+        workApp.put("appLevel",map.get("appLevel"));
+        workMapper.saveWorkApproval(workApp);
+
         return true;
     }
 }
