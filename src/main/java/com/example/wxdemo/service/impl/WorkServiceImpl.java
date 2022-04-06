@@ -82,4 +82,19 @@ public class WorkServiceImpl implements IWorkService {
     public List<Map> permUser(String twp_id, String userid, String nnApprovalLevel) {
         return workMapper.permUser(twp_id,userid,nnApprovalLevel);
     }
+
+    @Override
+    public void updateWap(String wap_id, String permResult) {
+        workMapper.updateWap(wap_id,permResult);
+    }
+
+    @Override
+    public void updateWork(String permResult, String s,String uuid) {
+        workMapper.updateWork(permResult,s,uuid);
+    }
+
+    @Override
+    public List<Map> myWorkList(String params) {
+        return workMapper.myWorkList(params);
+    }
 }

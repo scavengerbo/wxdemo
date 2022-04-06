@@ -22,4 +22,10 @@ public interface IWorkService {
     Map<String, String> getWap(String wid, String nowApprocalLevel);
 
     List<Map> permUser(String twp_id, String userid, String nnApprovalLevel);
+
+    void updateWap(String wap_id, String permResult);
+
+    void updateWork(String permResult, String s,String uuid);
+
+    List<Map> myWorkList(String userid);
 }
