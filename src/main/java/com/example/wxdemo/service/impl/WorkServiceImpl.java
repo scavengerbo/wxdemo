@@ -51,4 +51,35 @@ public class WorkServiceImpl implements IWorkService {
 
         return true;
     }
+
+    @Override
+    public Map<String,String> getWork(String wid) {
+        Map work = workMapper.getWork(wid);
+        return work;
+    }
+
+    @Override
+    public List<Map> getWorkCont(String wid, String approcalLevel) {
+        return workMapper.getWorkCont(wid,approcalLevel);
+    }
+
+    @Override
+    public String nextApprovalLevel(String twp_id, String approcalLevel) {
+        return workMapper.nextApprovalLevel(twp_id,approcalLevel);
+    }
+
+    @Override
+    public List<Map> workTitle(String twp_id, String approcalLevel) {
+        return workMapper.workTitle(twp_id,approcalLevel);
+    }
+
+    @Override
+    public Map<String, String> getWap(String wid, String nowApprocalLevel) {
+        return workMapper.getWap(wid,nowApprocalLevel);
+    }
+
+    @Override
+    public List<Map> permUser(String twp_id, String userid, String nnApprovalLevel) {
+        return workMapper.permUser(twp_id,userid,nnApprovalLevel);
+    }
 }
