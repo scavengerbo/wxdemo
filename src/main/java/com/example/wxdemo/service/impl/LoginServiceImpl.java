@@ -55,5 +55,13 @@ public class LoginServiceImpl implements ILoginService {
         return list;
     }
 
+    @Override
+    public Map getChildWord(String twpid) {
+        return loginMapper.getChildWord(twpid);
+    }
 
+    @Override
+    public List childUser(String twpid, String userid) {
+        return loginMapper.childUser(twpid,userid);
+    }
 }

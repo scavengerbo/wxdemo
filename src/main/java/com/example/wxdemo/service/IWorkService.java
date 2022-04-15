@@ -13,7 +13,7 @@ public interface IWorkService {
 
     Map<String,String> getWork(String wid);
 
-    List<Map> getWorkCont(String wid, String approcalLevel);
+    List<Map> getWorkCont(String wid, String approcalLevel,String nowpreappr);
 
     String nextApprovalLevel(String twp_id, String approcalLevel);
 
@@ -28,4 +28,18 @@ public interface IWorkService {
     void updateWork(String permResult, String s,String uuid);
 
     List<Map> myWorkList(String userid);
+
+    String nextappr(String wid, String nowpreappr);
+
+    void updateWork2(String permResult, String s, String w_id);
+
+    String preApprovalLevel(String twp_id, String approcalLevel);
+
+    String preappUser(String w_id, String preapprocalLevel);
+
+    List<Map> childWorkList(String userid);
+
+    int getchildsucc(String w_id);
+
+    String getparwork(String w_id);
 }

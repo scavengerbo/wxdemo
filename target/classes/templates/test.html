@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>标题</title>
+</head>
+<body>
+<form th:action="@{/user}" th:onsubmit="WeixinJSBridge.call('closeWindow')">
+    id:<input type="text" name="id" value=""/>
+    <input type="submit" value="提交" />
+</form>
+</body>
+</html>

@@ -16,7 +16,7 @@
 //    @Test
 //    public void test(){
 //
-//        boolean map = iLoginService.verifyByNameAndPasswd("Õı≈Ù", "123654");
+//        boolean map = iLoginService.verifyByNameAndPasswd("ÁéãÈπè", "123654");
 //
 //        System.out.println(map);
 //    }

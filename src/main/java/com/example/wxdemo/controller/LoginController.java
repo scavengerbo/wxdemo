@@ -63,9 +63,20 @@ public class LoginController {
         System.out.println(twpid);
         List list = iLoginService.workTitle(twpid);
         List list1 = iLoginService.permUser(twpid,userid);
-        Map<String,List> map = new HashMap<>();
+        Map<String,Object> map = new HashMap<>();
         map.put("workTitle",list);
         map.put("permUser",list1);
+        Map tcw_id = iLoginService.getChildWord(twpid);
+        if(!tcw_id.isEmpty()){
+            List list2 = iLoginService.childUser(twpid,userid);
+            map.put("childflag","Y");
+            map.put("childWork",tcw_id);
+            map.put("permChild",list2);
+        }else {
+            map.put("childflag","N");
+            map.put("childWork","");
+            map.put("permChild","");
+        }
         return ReturnData.success(map);
     }
 }

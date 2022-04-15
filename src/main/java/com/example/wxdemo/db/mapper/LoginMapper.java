@@ -17,23 +17,37 @@ public interface LoginMapper {
                 "and (c.exp_Time > sysdate() or c.exp_Time is null)")
     Map verifyByNameAndPasswd(@Param("name") String name, @Param("passwd") String passwd);
 
-        @Select("select a.wid as voucher,c.workName as title,b.createUser as apply_user_name,b.status as approvalStatus," +
-                "d.name as applicant,e.de_name department,f.name as company,date_format(b.createTime, '%Y-%m-%d %H:%i:%s') as applyTime,a.approcalLevel,cast(a.uuid as char) as id,'' as applyInstruction\n" +
-                "                from work_approval_proc a,\n" +
-                "                      work b,\n" +
-                "                     template_work_proc c,\n" +
-                "                     user d,department e,company f\n" +
-                "                 where a.wid = b.uuid\n" +
-                "                   and b.status = '1'\n" +
-                "                   and b.starttime <= sysdate()\n" +
-                "                   and b.endTime is null and a.endTime is null\n" +
-                "                   and a.approver = #{userId}\n" +
-                "and b.twp_id=c.uuid and b.createUser=d.uuid and d.de_id=e.uuid and e.c_id=f.uuid;")
+        @Select("select a.wid                                          as voucher,\n" +
+                "       c.workName                                     as title,\n" +
+                "       b.createUser                                   as apply_user_name,\n" +
+                "       b.status                                       as approvalStatus,\n" +
+                "       d.name                                         as applicant,\n" +
+                "       e.de_name                                         department,\n" +
+                "       f.name                                         as company,\n" +
+                "       date_format(b.createTime, '%Y-%m-%d %H:%i:%s') as applyTime,\n" +
+                "       a.approcalLevel,\n" +
+                "       cast(a.uuid as char)                           as id,\n" +
+                "       q.uuid                                         as tcwid,\n" +
+                "       q.workName                                     as applyInstruction,\n" +
+                "       a.preappr\n" +
+                "from work_approval_proc a\n" +
+                "         join work b on (a.wid = b.uuid)\n" +
+                "         join template_work_proc c on (b.twp_id = c.uuid)\n" +
+                "         join user d on (b.createUser = d.uuid)\n" +
+                "         join department e on (d.de_id = e.uuid)\n" +
+                "         join company f on (e.c_id = f.uuid)\n" +
+                "         left join template_child_work q on (q.twp_id = c.uuid)\n" +
+                "where b.status in ('1', '4')\n" +
+                "  and b.starttime <= sysdate()\n" +
+                "  and b.endTime is null\n" +
+                "  and a.endTime is null\n" +
+                "  and a.approver = #{userId}\n" +
+                "order by b.createTime desc")
         List<Map> agencyMatters(@Param("userId") String userId);
 
         @Select("select a.workName,cast(a.uuid as char) as twp_id\n" +
                 "from template_work_proc a\n" +
-                "where a.cid = #{cid}\n" +
+                "where a.cid = #{cid} and is_child='N'\n" +
                 "  and a.status = 1\n" +
                 "  and (exists(select 1\n" +
                 "              from permissions b\n" +
@@ -54,4 +68,14 @@ public interface LoginMapper {
                 "select c.uuid,c.name from template_approval_auth a,permissions b,user c,department d where a.twp_id=#{twpid} and a.approvalLevel=0\n" +
                 "and a.appr_perm=b.perms and b.type=1 and b.perm_mem=d.uuid and c.de_id=d.uuid and c.uuid!=#{userid}")
         List<Map> permUser(@Param("twpid") String twpid,@Param("userid") String userid);
+
+        @Select("select cast(a.uuid as char) as tcw_id,workname from template_child_work a where a.twp_id=#{twpid}")
+        Map getChildWord(@Param("twpid") String twpid);
+
+    @Select("select cast(c.uuid as char) as uuid,c.name from template_child_work a,permissions b,user c where a.twp_id=#{twpid}\n" +
+            "and a.permUser=b.perms and b.type=2 and b.perm_mem=c.uuid and c.uuid!=#{userid}\n" +
+            "union\n" +
+            "select c.uuid,c.name from template_child_work a,permissions b,user c,department d where a.twp_id=#{twpid}\n" +
+            "and a.permUser=b.perms and b.type=1 and b.perm_mem=d.uuid and c.de_id=d.uuid and c.uuid!=#{userid}")
+    List<Map> childUser(@Param("twpid") String twpid,@Param("userid") String userid);
 }

@@ -16,7 +16,7 @@ public class TestJson {
         user.setName("bobo");
 
         ObjectMapper objectMapper = new ObjectMapper();
-                // ½«Java¶ÔÏóĞòÁĞ»¯ÎªJson×Ö·û´®
+                // å°†Javaå¯¹è±¡åºåˆ—åŒ–ä¸ºJsonå­—ç¬¦ä¸²
                 String objectToJson = objectMapper.writeValueAsString(user);
                 System.out.println(objectToJson);
 
@@ -36,7 +36,7 @@ public class TestJson {
 
 
 
-        String a = new String("Áõ²¨");
+        String a = new String("åˆ˜æ³¢");
         val bytes1 = a.getBytes();
         String objectToJson2 = objectMapper.writeValueAsString(bytes1);
         System.out.println(objectToJson2);

@@ -53,35 +53,42 @@ public class WorkController {
 
     @PostMapping("/approvalWork")
     public ReturnData approvalWork(@RequestParam Map<String,Object> params){
+        System.out.println("RequestParam");
         List<HashMap<String,Object>> list = new ArrayList<>();
         HashMap<String,Object> map = new HashMap<>();
-        String approcalLevel = params.get("approcalLevel").toString();
+        String preappr = params.get("preappr").toString();
         String wid = params.get("voucher").toString();
         String userid = params.get("userid").toString();
         String nowApprocalLevel = "0";
+        String nowpreappr = "0";
         Map<String,String> work = iWorkService.getWork(wid);
-        work.put("ApprocalLevel","0");
+        work.put("nextApprovalLevel",nowApprocalLevel);
         map.put("usersmsg",work);
-        List<Map> workcont = iWorkService.getWorkCont(wid,nowApprocalLevel);
-        map.put("workmsg",workcont);
+        List<Map> workcont = iWorkService.getWorkCont(wid,nowApprocalLevel,nowpreappr);
+        map.put("workmsg",workcont.size()==0?"":workcont);
         map.put("workflag","R");
         map.put("permflag","N");
         map.put("permUser",null);
         list.add(map);
         System.out.println(list);
-        while (!approcalLevel.equals(nowApprocalLevel)){
+        while (!preappr.equals(nowpreappr)){
             HashMap<String,Object> map2 = new HashMap<>();
-            System.out.println("--------------------------");
+            System.out.println("--------------------------"+preappr+"###"+nowpreappr );
             // 获取下一个审批等级
-            Map<String,String> getWap = iWorkService.getWap(wid,nowApprocalLevel);
-            String nextApprovalLevel = iWorkService.nextApprovalLevel(work.get("twp_id"),nowApprocalLevel);
-            getWap.put("ApprocalLevel",nextApprovalLevel);
+            Map<String,String> getWap = iWorkService.getWap(wid,nowpreappr);
+            String nextApprovalLevel ;
+            if(getWap.get("approcalLevel").equals("-1")){
+                nextApprovalLevel = "0";
+            }else{
+                nextApprovalLevel = iWorkService.nextApprovalLevel(work.get("twp_id"),getWap.get("approcalLevel"));
+            }
+            String nextappr = iWorkService.nextappr(wid,nowpreappr);
+            getWap.put("nextApprovalLevel",nextApprovalLevel);
             map2.put("usersmsg",getWap);
-
-            workcont = iWorkService.getWorkCont(wid,nextApprovalLevel);
-            map2.put("workmsg",workcont);
+            List<Map> workcont2 = iWorkService.getWorkCont(wid,nextApprovalLevel,nextappr);
+            map2.put("workmsg",workcont2);
             map2.put("workflag","R");
-            nowApprocalLevel = iWorkService.nextApprovalLevel(work.get("twp_id"),nowApprocalLevel);
+            nowpreappr = iWorkService.nextappr(wid,nowpreappr);
             map2.put("permflag","N");
             map2.put("permUser",null);
             list.add(map2);
@@ -89,19 +96,23 @@ public class WorkController {
         }
         // 获取下一个审批等级和填写内容
         HashMap<String,Object> map3 = new HashMap<>();
-        Map<String,String> getWap = iWorkService.getWap(wid,nowApprocalLevel);
-        String nextApprovalLevel = iWorkService.nextApprovalLevel(work.get("twp_id"),nowApprocalLevel);
-        getWap.put("ApprocalLevel",nextApprovalLevel);
+        Map<String,String> getWap = iWorkService.getWap(wid,nowpreappr);
+        System.out.println(getWap);
+        String nextApprovalLevel ;
+        if(getWap.get("approcalLevel").equals("-1")){
+            nextApprovalLevel = "0";
+        }else{
+            nextApprovalLevel = iWorkService.nextApprovalLevel(work.get("twp_id"),getWap.get("approcalLevel"));
+        }
+        getWap.put("nextApprovalLevel",nextApprovalLevel);
         map3.put("usersmsg",getWap);
         List<Map> workTitle = iWorkService.workTitle(work.get("twp_id"),nextApprovalLevel);
         map3.put("workmsg",workTitle);
         map3.put("workflag","W");
 
-        String nnApprovalLevel = iWorkService.nextApprovalLevel(work.get("twp_id"),nextApprovalLevel) == null?"":iWorkService.nextApprovalLevel(work.get("twp_id"),nextApprovalLevel);
+         String nnApprovalLevel = iWorkService.nextApprovalLevel(work.get("twp_id"),nextApprovalLevel) == null?"":iWorkService.nextApprovalLevel(work.get("twp_id"),nextApprovalLevel);
+         System.out.println("nnApprovalLevel------------"+nnApprovalLevel);
         if (!nnApprovalLevel.equals("")){
-            System.out.println(work.get("twp_id"));
-            System.out.println(userid);
-            System.out.println(nnApprovalLevel);
             List<Map> permUser = iWorkService.permUser(work.get("twp_id"),userid,nextApprovalLevel);
             map3.put("permflag","Y");
             map3.put("permUser",permUser);
@@ -116,6 +127,7 @@ public class WorkController {
 
     @PostMapping("/sumbitPerm")
     public ReturnData sumbitPerm(@RequestBody Map<String,Object> params){
+        System.out.println("sumbitPerm");
         System.out.println(params);
         String perResult = params.get("permResult").toString();
         Map<String,Object> approval = (Map<String,Object>)params.get("approval");
@@ -123,24 +135,65 @@ public class WorkController {
         Map<String,String> usersmsg = (Map<String,String>)approval.get("usersmsg");
         String wap_id = usersmsg.get("wap_id");
         String w_id = usersmsg.get("w_id");
+        String approcalLevel = usersmsg.get("approcalLevel");
+        String start_appr;
+        String start_user;
         List<Map> workmsg = (List<Map>)approval.get("workmsg");
         workmsg.stream().forEach(wc -> {
             wc.put("wid", usersmsg.get("w_id"));
+            wc.put("wap_id", usersmsg.get("wap_id"));
             workMapper.saveWorkContent(wc);
         });
         iWorkService.updateWap(wap_id,params.get("permResult").toString());
         //workMap.put("createTime", DateFormatUtil.getDefaultCurrDataStr());
         if(params.get("permResult").toString().equals("2")){
-            iWorkService.updateWork(params.get("permResult").toString(),"2",w_id);
+            iWorkService.updateWork2(params.get("permResult").toString(),"4",w_id);
+            if (approcalLevel.equals("0")){
+                start_appr = "-1";
+                start_user= usersmsg.get("workuser");
+            } else {
+                String preapprocalLevel = iWorkService.preApprovalLevel(usersmsg.get("twp_id"),approcalLevel);
+                String preUser = iWorkService.preappUser(w_id,preapprocalLevel);
+                start_appr = preapprocalLevel;
+                start_user = preUser;
+            }
+            Map<String,String> map = new HashMap<>();
+            map.put("workId",w_id);
+            map.put("permUserID",start_user); // start_user
+            map.put("appLevel",start_appr); // start_appr
+            map.put("wap_id",wap_id);
+            map.put("start_appr",usersmsg.get("approcalLevel")); // usersmsg.get("ApprocalLevel")
+            map.put("start_user",usersmsg.get("createUser")); // usersmsg.get("createUser")
+            map.put("result","0");
+            workMapper.saveWorkApproval(map);
         } else {
+            System.out.println("permflag----"+approval.get("permflag"));
             if(approval.get("permflag").toString().equals("Y")){
+//                System.out.println(params);
                 Map<String,String> map = new HashMap<>();
                 map.put("workId",w_id);
-                map.put("permUserID",permUser.get("userid"));
-                map.put("appLevel",usersmsg.get("ApprocalLevel"));
+                map.put("permUserID",permUser.get("userid")); // usersmsg.get("start_appr");
+                map.put("appLevel",usersmsg.get("nextApprovalLevel")); // usersmsg.get("start_user");
+                map.put("wap_id",wap_id);
+                map.put("start_appr",usersmsg.get("approcalLevel")); // usersmsg.get("ApprocalLevel")
+                map.put("start_user",usersmsg.get("createUser")); // usersmsg.get("createUser")
+                map.put("result","0");
                 workMapper.saveWorkApproval(map);
+                iWorkService.updateWork2("0","1",w_id);
             }else{
                 iWorkService.updateWork(params.get("permResult").toString(),"2",w_id);
+                int num = iWorkService.getchildsucc(w_id);
+                if(num == 0){
+                    iWorkService.updateWork(params.get("permResult").toString(),"5",w_id);
+                }
+
+                String par_work = iWorkService.getparwork(w_id) == null?"":iWorkService.getparwork(w_id);
+                if (!par_work.equals("")){
+                    int num2 = iWorkService.getchildsucc(par_work);
+                    if(num2 == 0){
+                        iWorkService.updateWork(params.get("permResult").toString(),"5",par_work);
+                    }
+                }
             }
         }
 
@@ -156,6 +209,14 @@ public class WorkController {
         return ReturnData.success(myWorkList);
     }
 
+    @PostMapping("/childWorkList")
+    public ReturnData childWorkList(@RequestParam Map<String,Object> params){
+
+        String userid = params.get("userid").toString();
+        List<Map> myWorkList = iWorkService.childWorkList(userid);
+        return ReturnData.success(myWorkList);
+    }
+
     @PostMapping("/myWork")
     public ReturnData myWork(@RequestParam Map<String,Object> params){
         List<HashMap<String,Object>> list = new ArrayList<>();
@@ -165,15 +226,16 @@ public class WorkController {
         String twp_id = params.get("twp_id").toString();
 //        String userid = params.get("userid").toString();
         String nowApprocalLevel = "0";
+        String nowAppr = "0";
         Map<String,String> work = iWorkService.getWork(wid);
         map.put("usersmsg",work);
-        List<Map> workcont = iWorkService.getWorkCont(wid,nowApprocalLevel);
-        map.put("workmsg",workcont);
+        List<Map> workcont = iWorkService.getWorkCont(wid,nowApprocalLevel,nowAppr);
+        map.put("workmsg",workcont.size()==0?"":workcont);
         list.add(map);
 
 
         if(!approvalStatus.equals("0")){
-            Map<String,String> getWap = iWorkService.getWap(wid,nowApprocalLevel);
+            Map<String,String> getWap = iWorkService.getWap(wid,nowAppr);
             String result = getWap.get("result");
             if(result.equals("0")){
                 HashMap<String,Object> map2 = new HashMap<>();
@@ -183,15 +245,22 @@ public class WorkController {
             }else{
                 do{
                     HashMap<String,Object> map2 = new HashMap<>();
-                    Map<String,String> getWap2 = iWorkService.getWap(wid,nowApprocalLevel);
+                    Map<String,String> getWap2 = iWorkService.getWap(wid,nowAppr);
                     map2.put("usersmsg",getWap2);
-                    String nextApprovalLevel = iWorkService.nextApprovalLevel(work.get("twp_id"),nowApprocalLevel);
-                    List<Map> workcont2 = iWorkService.getWorkCont(wid,nextApprovalLevel);
-                    map2.put("workmsg",workcont2);
+                    String nextApprovalLevel ;
+                    if(getWap2.get("approcalLevel").equals("-1")){
+                        nextApprovalLevel = "0";
+                    }else{
+                        nextApprovalLevel = iWorkService.nextApprovalLevel(work.get("twp_id"),getWap2.get("approcalLevel"));
+                    }
+                    String nextappr = iWorkService.nextappr(wid,nowAppr);
+                    System.out.println(wid+"--"+nextApprovalLevel+"--"+nextappr);
+                    List<Map> workcont2 = iWorkService.getWorkCont(wid,nextApprovalLevel,nextappr);
+                    map2.put("workmsg",workcont2.size()==0?"":workcont2);
                     list.add(map2);
-                    nowApprocalLevel = nextApprovalLevel;
+                    nowAppr = nextappr;
                     result = getWap2.get("result");
-                    if(result.equals("2")||iWorkService.nextApprovalLevel(work.get("twp_id"),nowApprocalLevel).equals("")){
+                    if((iWorkService.nextappr(wid,nowAppr) == null ? "":iWorkService.nextappr(wid,nowAppr)).equals("")){
                         break;
                     }
                 }while(!result.equals("0"));

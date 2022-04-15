@@ -16,4 +16,8 @@ public interface ILoginService {
     List workTitle(String twpid);
 
     List permUser(String twpid, String userid);
+
+    Map getChildWord(String twpid);
+
+    List childUser(String twpid, String userid);
 }
