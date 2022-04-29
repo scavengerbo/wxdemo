@@ -32,7 +32,8 @@ public interface WorkMapper {
             "  and a.twp_id = d.uuid and a.uuid=#{wid}")
     Map<String,String> getWork(@Param("wid") String wid);
 
-    @Select("select c.twc_value as vl, cast(c.uuid as char) as wc_id, b.name as name, b.type, a.is_null, 1 as readonly\n" +
+    @Select("select c.twc_value as vl, cast(c.uuid as char) as wc_id, b.name as name, b.type, a.is_null, 1 as readonly," +
+            "cast(a.uuid as char) as twc_id\n" +
             "from template_work_content a,\n" +
             "     template_title b,\n" +
             "     work_content c\n" +
@@ -56,7 +57,7 @@ public interface WorkMapper {
     @Select("select a.uuid from work_approval_proc a where a.wid=#{wid} and a.preappr=#{appr}")
     String nextappr(@Param("wid") String wid,@Param("appr") String appr);
 
-    @Select("select '' as vl,a.uuid as twc_id,b.name as name,b.type,a.is_null,case when b.type=1 or b.type=2 then 0 else 1 end as readonly\n" +
+    @Select("select '' as vl,a.uuid as twc_id,b.name as name,b.type,a.is_null,case when b.type=1 or b.type=2 then 0 else 1 end as readonly,a.sum_uuid\n" +
             "from template_work_content a,template_title b where a.twp_id=#{twpid} and a.approvalLevel=#{approcalLevel}\n" +
             "and a.tid=b.uuid and b.status=1 order by  a.`order`")
     List<Map> workTitle(@Param("twpid") String twpid,@Param("approcalLevel") String approcalLevel);

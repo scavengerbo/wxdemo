@@ -5,10 +5,15 @@ import com.example.wxdemo.db.mapper.WorkMapper;
 import com.example.wxdemo.service.IWorkService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.init.ScriptException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import java.math.BigDecimal;
 import java.util.*;
 
 @RestController()
@@ -52,7 +57,8 @@ public class WorkController {
     }
 
     @PostMapping("/approvalWork")
-    public ReturnData approvalWork(@RequestParam Map<String,Object> params){
+    public ReturnData approvalWork(@RequestParam Map<String,Object> params) throws javax.script.ScriptException {
+        Map<String,Object> valmap = new HashMap<>();
         System.out.println("RequestParam");
         List<HashMap<String,Object>> list = new ArrayList<>();
         HashMap<String,Object> map = new HashMap<>();
@@ -65,6 +71,9 @@ public class WorkController {
         work.put("nextApprovalLevel",nowApprocalLevel);
         map.put("usersmsg",work);
         List<Map> workcont = iWorkService.getWorkCont(wid,nowApprocalLevel,nowpreappr);
+        workcont.forEach(workcontmap -> {
+            valmap.put(workcontmap.get("twc_id").toString(),workcontmap.get("vl").toString());
+        });
         map.put("workmsg",workcont.size()==0?"":workcont);
         map.put("workflag","R");
         map.put("permflag","N");
@@ -86,6 +95,9 @@ public class WorkController {
             getWap.put("nextApprovalLevel",nextApprovalLevel);
             map2.put("usersmsg",getWap);
             List<Map> workcont2 = iWorkService.getWorkCont(wid,nextApprovalLevel,nextappr);
+            workcont2.forEach(workcontmap -> {
+                valmap.put(workcontmap.get("twc_id").toString(),workcontmap.get("vl").toString());
+            });
             map2.put("workmsg",workcont2);
             map2.put("workflag","R");
             nowpreappr = iWorkService.nextappr(wid,nowpreappr);
@@ -107,6 +119,14 @@ public class WorkController {
         getWap.put("nextApprovalLevel",nextApprovalLevel);
         map3.put("usersmsg",getWap);
         List<Map> workTitle = iWorkService.workTitle(work.get("twp_id"),nextApprovalLevel);
+        for (int i=0;i<workTitle.size();i++){
+            String sum_uuid = workTitle.get(i).get("sum_uuid")==null?"":workTitle.get(i).get("sum_uuid").toString();
+            if(!sum_uuid.equals("")){
+//                System.out.println("12345678");
+//                System.out.println(jsEval(sum_uuid,valmap));
+                workTitle.get(i).put("vl",jsEval(sum_uuid,valmap));
+            }
+        }
         map3.put("workmsg",workTitle);
         map3.put("workflag","W");
 
@@ -270,5 +290,12 @@ public class WorkController {
         }
         System.out.println(list);
         return ReturnData.success(list);
+    }
+
+    public static Object jsEval(String formula,Map<String,Object> varMap) throws ScriptException, javax.script.ScriptException {
+        formula = new StringSubstitutor(varMap).replace(formula);
+        ScriptEngine jse = new ScriptEngineManager().getEngineByName("JavaScript");
+        Object evaluate = jse.eval(formula);
+        return new BigDecimal(evaluate.toString()).setScale(2,BigDecimal.ROUND_HALF_UP).toString();
     }
 }
